@@ -364,7 +364,7 @@
                 <input type="text" id="clave" placeholder="clave" value="1234">
             </div>
         </div>
-        <div class="row" id="rowAdicional" style="margin-top: -0.5rem;">
+        <div class="row" style="margin-top: -0.5rem;">
             <div class="col">
                 <label>🔞 Clave adulto (opcional)</label>
                 <input type="text" id="claveAdulto" placeholder="0000" value="">
@@ -430,7 +430,6 @@ Vence a las: 11:43 p. m. (2 horas después de creado)
             const modoBadge = document.getElementById('modoBadge');
             const toast = document.getElementById('toast');
             let toastTimeout = null;
-            let imagenActual = null;
             let modoDetectado = 'STELLA';
 
             // --- Toast ---
@@ -443,21 +442,18 @@ Vence a las: 11:43 p. m. (2 horas después de creado)
                 }, 2600);
             }
 
-            // --- Detectar si es formato Xstream-API (Host-URL, Username, Password) ---
+            // --- Detectar si es formato Xstream-API ---
             function detectarModo(texto) {
                 const lower = texto.toLowerCase();
                 if (lower.includes('host-url') || lower.includes('xstream-api') || 
-                    (lower.includes('username') && lower.includes('password'))) {
-                    return 'PANAXTREAMING';
-                }
-                // Si contiene "panax" en el texto
-                if (lower.includes('panax')) {
+                    (lower.includes('username') && lower.includes('password')) ||
+                    lower.includes('panax')) {
                     return 'PANAXTREAMING';
                 }
                 return 'STELLA';
             }
 
-            // --- Extraer datos según modo ---
+            // --- Extraer datos ---
             function extraerDatos(texto) {
                 const modo = detectarModo(texto);
                 let usuario = '';
@@ -466,7 +462,6 @@ Vence a las: 11:43 p. m. (2 horas después de creado)
                 let marca = '';
 
                 if (modo === 'PANAXTREAMING') {
-                    // Buscar Username, Password, y Clave contenido adulto
                     const userMatch = texto.match(/Username:\s*([^\n]+)/i) || 
                                       texto.match(/Usuario:\s*([^\n]+)/i);
                     const passMatch = texto.match(/Password:\s*([^\n]+)/i) ||
@@ -477,10 +472,8 @@ Vence a las: 11:43 p. m. (2 horas después de creado)
                     if (userMatch) usuario = userMatch[1].trim();
                     if (passMatch) clave = passMatch[1].trim();
                     if (adultMatch) claveAdulto = adultMatch[1].trim();
-
                     marca = 'PANAXTREAMING';
                 } else {
-                    // Modo STELLA (formato original)
                     const userMatch = texto.match(/Usuario:\s*([^\n]+)/i);
                     const passMatch = texto.match(/Clave:\s*([^\n]+)/i);
                     if (userMatch) usuario = userMatch[1].trim();
@@ -488,7 +481,6 @@ Vence a las: 11:43 p. m. (2 horas después de creado)
                     marca = 'STELLA TV';
                 }
 
-                // Si no se encontró nada, usar valores por defecto
                 if (!usuario) usuario = 'demostellax8556';
                 if (!clave) clave = '1234';
 
@@ -498,7 +490,6 @@ Vence a las: 11:43 p. m. (2 horas después de creado)
             // --- Procesar imagen ---
             function processImage(file) {
                 if (!file) return;
-                imagenActual = file;
 
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -523,7 +514,6 @@ Vence a las: 11:43 p. m. (2 horas después de creado)
                                 marcaInput.value = datos.marca;
                                 modoDetectado = datos.modo;
 
-                                // Actualizar badge
                                 modoBadge.textContent = datos.modo;
                                 if (datos.modo === 'PANAXTREAMING') {
                                     modoBadge.className = 'badge panax';
@@ -548,7 +538,6 @@ Vence a las: 11:43 p. m. (2 horas después de creado)
 
             // --- Eliminar imagen ---
             function removeImage() {
-                imagenActual = null;
                 previewContainer.classList.add('hidden');
                 previewImg.src = '#';
                 uploadInput.value = '';
@@ -596,7 +585,6 @@ Vence a las: 11:43 p. m. (2 horas después de creado)
 
                 let mensaje = '';
 
-                // Si es modo PANAXTREAMING o la marca contiene PANAXTREAMING
                 if (modoDetectado === 'PANAXTREAMING' || marcaUpper.includes('PANAXTREAMING')) {
                     mensaje = `📺 DATOS DE SU DEMO ${marcaUpper} 📺
 
@@ -615,7 +603,6 @@ Vence a las: 11:43 p. m. (2 horas después de creado)
 
 ✨ ¡Disfruta de la mejor experiencia con ${marcaUpper}! ✨`;
                 } else {
-                    // Modo STELLA (formato original)
                     const demoLabel = duracion.includes('1 HORA') ? 'DEMO 1H' :
                                       duracion.includes('6 HORAS') ? 'DEMO 6H' : 'DEMO 2H';
                     mensaje = `GENERADOR STELLA - ${demoLabel}
@@ -648,14 +635,12 @@ Vence a las: ${vHoraStr} (${duracionTexto} después de creado)
             marcaInput.addEventListener('input', actualizarMensaje);
             demoSelect.addEventListener('change', actualizarMensaje);
 
-            // Subida por input file
             uploadInput.addEventListener('change', function(e) {
                 if (this.files && this.files[0]) {
                     processImage(this.files[0]);
                 }
             });
 
-            // Drag & drop
             dropArea.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 dropArea.classList.add('dragover');
@@ -675,7 +660,6 @@ Vence a las: ${vHoraStr} (${duracionTexto} después de creado)
                 }
             });
 
-            // Pegar imagen desde portapapeles
             document.addEventListener('paste', function(e) {
                 const items = e.clipboardData.items;
                 for (let item of items) {
@@ -691,10 +675,8 @@ Vence a las: ${vHoraStr} (${duracionTexto} después de creado)
                 }
             });
 
-            // Eliminar imagen
             removeImgBtn.addEventListener('click', removeImage);
 
-            // Copiar mensaje
             document.getElementById('copiarBtn').addEventListener('click', function() {
                 const texto = mensajePre.textContent;
                 navigator.clipboard.writeText(texto).then(() => {
@@ -710,16 +692,13 @@ Vence a las: ${vHoraStr} (${duracionTexto} después de creado)
                 });
             });
 
-            // WhatsApp
             document.getElementById('whatsappBtn').addEventListener('click', function() {
                 const texto = encodeURIComponent(mensajePre.textContent);
                 window.open(`https://wa.me/?text=${texto}`, '_blank');
             });
 
-            // Inicializar mensaje
             actualizarMensaje();
 
-            // Cargar Tesseract
             const script = document.createElement('script');
             script.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
             script.onload = function() {
