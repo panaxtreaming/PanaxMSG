@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stella · Generador de mensaje demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(145deg, #0b0e18 0%, #1a1f2e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            padding: 1.5rem;
+        }
+        .card {
+            max-width: 720px;
+            width: 100%;
+            background: rgba(22, 28, 46, 0.85);
+            backdrop-filter: blur(8px);
+            border-radius: 40px;
+            padding: 2rem 2rem 2.2rem;
+            box-shadow: 0 25px 45px -12px rgba(0,0,0,0.8), 0 0 0 1px rgba(255, 215, 0, 0.15);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            transition: 0.2s;
+        }
+        h1 {
+            font-size: 1.9rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #f9e05d, #f6b83d);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .sub {
+            color: #9aa3c7;
+            font-size: 0.9rem;
+            font-weight: 400;
+            margin-bottom: 1.8rem;
+            border-left: 3px solid #f6b83d;
+            padding-left: 12px;
+            opacity: 0.8;
+        }
+        .upload-area {
+            background: #111624;
+            border-radius: 28px;
+            padding: 1.8rem 1.5rem;
+            border: 2px dashed #3b435f;
+            transition: 0.2s;
+            text-align: center;
+            margin-bottom: 1.2rem;
+            cursor: pointer;
+            position: relative;
+        }
+        .upload-area:hover {
+            border-color: #f6b83d;
+            background: #161d2b;
+        }
+        .upload-area.dragover {
+            border-color: #f6b83d;
+            background: #1c243b;
+        }
+        .upload-area label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: #b7c0e0;
+            font-weight: 450;
+            cursor: pointer;
+        }
+        .upload-area label svg {
+            width: 44px;
+            height: 44px;
+            stroke: #f6b83d;
+            stroke-width: 1.5;
+            fill: none;
+        }
+        .upload-area input[type="file"] {
+            display: none;
+        }
+        .upload-hint {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: #6a75a0;
+            margin-top: 6px;
+            flex-wrap: wrap;
+        }
+        .upload-hint span {
+            background: #1a2133;
+            padding: 4px 14px;
+            border-radius: 30px;
+            border: 1px solid #2b3450;
+        }
+        .preview {
+            margin: 0.5rem 0 1rem;
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+        .preview img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 18px;
+            border: 1px solid #2f3855;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+        }
+        .preview .remove-img {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: #1f283e;
+            border: 1px solid #4a567a;
+            border-radius: 30px;
+            color: #f0f3ff;
+            padding: 2px 14px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .preview .remove-img:hover {
+            background: #a03a3a;
+            border-color: #f6b83d;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 1.5rem 0 1.2rem;
+        }
+        .col {
+            flex: 1 0 180px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .col label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #7d87b0;
+            font-weight: 600;
+        }
+        .col input {
+            background: #0f1420;
+            border: 1px solid #2b3450;
+            border-radius: 18px;
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            color: #f0f3ff;
+            font-weight: 450;
+            outline: none;
+            transition: 0.15s;
+            width: 100%;
+        }
+        .col input:focus {
+            border-color: #f6b83d;
+            box-shadow: 0 0 0 3px rgba(246, 184, 61, 0.2);
+        }
+        .col input::placeholder {
+            color: #4c5780;
+            font-weight: 300;
+        }
+        .demo-selector {
+            background: #0f1420;
+            border-radius: 30px;
+            padding: 0.4rem 0.4rem 0.4rem 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #2b3450;
+            margin: 1.2rem 0 1.5rem;
+            flex-wrap: wrap;
+        }
+        .demo-selector span {
+            color: #aeb7de;
+            font-weight: 450;
+            font-size: 0.9rem;
+        }
+        .demo-selector select {
+            background: #1b2338;
+            border: none;
+            padding: 10px 24px 10px 18px;
+            border-radius: 40px;
+            color: #f0f3ff;
+            font-weight: 500;
+            font-size: 0.95rem;
+            outline: none;
+            cursor: pointer;
+            border: 1px solid #3b4567;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23f6b83d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+        }
+        .demo-selector select option {
+            background: #1b2338;
+        }
+        .message-box {
+            background: #0b101c;
+            border-radius: 24px;
+            padding: 1.5rem;
+            border: 1px solid #29324b;
+            margin: 1.2rem 0 1.8rem;
+            word-break: break-word;
+            min-height: 180px;
+        }
+        .message-box pre {
+            white-space: pre-wrap;
+            font-family: 'Inter', monospace;
+            font-size: 0.95rem;
+            line-height: 1.8;
+            color: #dfe6ff;
+            margin: 0;
+        }
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+        .btn {
+            background: #1b2338;
+            border: 1px solid #384466;
+            color: #d6defa;
+            padding: 14px 28px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: 0.15s;
+            flex: 1 0 auto;
+            justify-content: center;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #f6b83d, #e09d2b);
+            border: none;
+            color: #0b0f1a;
+            font-weight: 600;
+            box-shadow: 0 6px 16px rgba(246, 184, 61, 0.25);
+        }
+        .btn-primary:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 22px rgba(246, 184, 61, 0.35);
+        }
+        .btn-secondary {
+            background: #212b44;
+            border-color: #3a4568;
+        }
+        .btn-secondary:hover {
+            background: #2b3755;
+            border-color: #f6b83d;
+        }
+        .btn:active {
+            transform: scale(0.97);
+        }
+        .footer-note {
+            margin-top: 1.8rem;
+            font-size: 0.75rem;
+            color: #4f5b82;
+            text-align: center;
+            letter-spacing: 0.02em;
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2a44;
+            padding: 12px 28px;
+            border-radius: 60px;
+            border: 1px solid #f6b83d;
+            color: #f0f3ff;
+            font-weight: 450;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            opacity: 0;
+            transition: 0.25s;
+            pointer-events: none;
+            backdrop-filter: blur(4px);
+            z-index: 999;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-6px);
+        }
+        .badge {
+            display: inline-block;
+            background: #1f2a44;
+            border: 1px solid #f6b83d;
+            border-radius: 30px;
+            padding: 2px 14px;
+            font-size: 0.7rem;
+            color: #f6b83d;
+            margin-left: 8px;
+        }
+        .badge.panax {
+            border-color: #4fc3f7;
+            color: #4fc3f7;
+        }
+        @media (max-width: 520px) {
+            .card { padding: 1.5rem; }
+            .row { flex-direction: column; }
+            .col { flex: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="card" id="app">
+        <h1>✦ STELLA · DEMO <span class="badge" id="modoBadge">STELLA</span></h1>
+        <div class="sub">generador de mensaje · 1H / 2H / 6H</div>
+
+        <!-- Área de subida / pegado -->
+        <div class="upload-area" id="dropArea">
+            <label for="imageUpload">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+                <span>Sube o pega una imagen (captura de pantalla)</span>
+                <div class="upload-hint">
+                    <span>📁 Haz clic para subir</span>
+                    <span>📋 Ctrl+V para pegar</span>
+                    <span>🖱️ Arrastra y suelta</span>
+                </div>
+            </label>
+            <input type="file" id="imageUpload" accept="image/*">
+        </div>
+
+        <!-- Vista previa con botón eliminar -->
+        <div id="previewContainer" class="preview hidden">
+            <img id="previewImg" src="#" alt="Vista previa">
+            <button class="remove-img" id="removeImgBtn">✕ Eliminar</button>
+        </div>
+
+        <!-- Datos extraídos -->
+        <div class="row">
+            <div class="col">
+                <label>👤 Usuario</label>
+                <input type="text" id="usuario" placeholder="usuario123" value="demostellax8556">
+            </div>
+            <div class="col">
+                <label>🔑 Clave</label>
+                <input type="text" id="clave" placeholder="clave" value="1234">
+            </div>
+        </div>
+        <div class="row" id="rowAdicional" style="margin-top: -0.5rem;">
+            <div class="col">
+                <label>🔞 Clave adulto (opcional)</label>
+                <input type="text" id="claveAdulto" placeholder="0000" value="">
+            </div>
+            <div class="col">
+                <label>🏷️ Marca / Servicio</label>
+                <input type="text" id="marcaServicio" placeholder="STELLA TV / PANAXTREAMING" value="STELLA TV">
+            </div>
+        </div>
+
+        <!-- Selector de demo -->
+        <div class="demo-selector">
+            <span>⏱️ Duración demo</span>
+            <select id="demoDuration">
+                <option value="1 HORA">DEMO DE UNA HORA</option>
+                <option value="2 HORAS" selected>DEMO DE DOS HORAS</option>
+                <option value="6 HORAS">DEMO DE 6 HORAS</option>
+            </select>
+        </div>
+
+        <!-- Mensaje generado -->
+        <div class="message-box">
+            <pre id="mensajeFinal">GENERADOR STELLA - DEMO 2H
+
+DATOS DE SU DEMO STELLA TV
+
+Usuario: demostellax8556  
+Clave: 1234  
+
+Fecha de entrega: 02/07/2026  
+Hora de entrega: 09:43 p. m.  
+
+Vence a las: 11:43 p. m. (2 horas después de creado)  
+
+¡Disfruta de la mejor experiencia con STELLA TV!</pre>
+        </div>
+
+        <!-- Acciones -->
+        <div class="actions">
+            <button class="btn btn-primary" id="copiarBtn">📋 COPIAR MENSAJE</button>
+            <button class="btn btn-secondary" id="whatsappBtn">💬 WhatsApp</button>
+        </div>
+        <div class="footer-note">Los datos se extraen automáticamente al subir o pegar una imagen · edita manualmente si es necesario</div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast">✅ Mensaje copiado al portapapeles</div>
+
+    <script>
+        (function() {
+            // Elementos DOM
+            const uploadInput = document.getElementById('imageUpload');
+            const dropArea = document.getElementById('dropArea');
+            const previewContainer = document.getElementById('previewContainer');
+            const previewImg = document.getElementById('previewImg');
+            const removeImgBtn = document.getElementById('removeImgBtn');
+            const usuarioInput = document.getElementById('usuario');
+            const claveInput = document.getElementById('clave');
+            const claveAdultoInput = document.getElementById('claveAdulto');
+            const marcaInput = document.getElementById('marcaServicio');
+            const demoSelect = document.getElementById('demoDuration');
+            const mensajePre = document.getElementById('mensajeFinal');
+            const modoBadge = document.getElementById('modoBadge');
+            const toast = document.getElementById('toast');
+            let toastTimeout = null;
+            let imagenActual = null;
+            let modoDetectado = 'STELLA';
+
+            // --- Toast ---
+            function showToast(text) {
+                toast.textContent = text || '✅ Copiado al portapapeles';
+                toast.classList.add('show');
+                if (toastTimeout) clearTimeout(toastTimeout);
+                toastTimeout = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2600);
+            }
+
+            // --- Detectar si es formato Xstream-API (Host-URL, Username, Password) ---
+            function detectarModo(texto) {
+                const lower = texto.toLowerCase();
+                if (lower.includes('host-url') || lower.includes('xstream-api') || 
+                    (lower.includes('username') && lower.includes('password'))) {
+                    return 'PANAXTREAMING';
+                }
+                // Si contiene "panax" en el texto
+                if (lower.includes('panax')) {
+                    return 'PANAXTREAMING';
+                }
+                return 'STELLA';
+            }
+
+            // --- Extraer datos según modo ---
+            function extraerDatos(texto) {
+                const modo = detectarModo(texto);
+                let usuario = '';
+                let clave = '';
+                let claveAdulto = '';
+                let marca = '';
+
+                if (modo === 'PANAXTREAMING') {
+                    // Buscar Username, Password, y Clave contenido adulto
+                    const userMatch = texto.match(/Username:\s*([^\n]+)/i) || 
+                                      texto.match(/Usuario:\s*([^\n]+)/i);
+                    const passMatch = texto.match(/Password:\s*([^\n]+)/i) ||
+                                      texto.match(/Clave:\s*([^\n]+)/i);
+                    const adultMatch = texto.match(/Clave contenido adulto:\s*([^\n]+)/i) ||
+                                       texto.match(/Clave adulto:\s*([^\n]+)/i);
+
+                    if (userMatch) usuario = userMatch[1].trim();
+                    if (passMatch) clave = passMatch[1].trim();
+                    if (adultMatch) claveAdulto = adultMatch[1].trim();
+
+                    marca = 'PANAXTREAMING';
+                } else {
+                    // Modo STELLA (formato original)
+                    const userMatch = texto.match(/Usuario:\s*([^\n]+)/i);
+                    const passMatch = texto.match(/Clave:\s*([^\n]+)/i);
+                    if (userMatch) usuario = userMatch[1].trim();
+                    if (passMatch) clave = passMatch[1].trim();
+                    marca = 'STELLA TV';
+                }
+
+                // Si no se encontró nada, usar valores por defecto
+                if (!usuario) usuario = 'demostellax8556';
+                if (!clave) clave = '1234';
+
+                return { usuario, clave, claveAdulto, marca, modo };
+            }
+
+            // --- Procesar imagen ---
+            function processImage(file) {
+                if (!file) return;
+                imagenActual = file;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        previewImg.src = e.target.result;
+                        previewContainer.classList.remove('hidden');
+
+                        if (typeof Tesseract !== 'undefined') {
+                            Tesseract.recognize(
+                                img,
+                                'spa+eng',
+                                { logger: m => console.log(m) }
+                            ).then(({ data: { text } }) => {
+                                const extractedText = text;
+                                console.log('Texto extraído:', extractedText);
+
+                                const datos = extraerDatos(extractedText);
+                                usuarioInput.value = datos.usuario;
+                                claveInput.value = datos.clave;
+                                if (datos.claveAdulto) claveAdultoInput.value = datos.claveAdulto;
+                                marcaInput.value = datos.marca;
+                                modoDetectado = datos.modo;
+
+                                // Actualizar badge
+                                modoBadge.textContent = datos.modo;
+                                if (datos.modo === 'PANAXTREAMING') {
+                                    modoBadge.className = 'badge panax';
+                                } else {
+                                    modoBadge.className = 'badge';
+                                }
+
+                                actualizarMensaje();
+                                showToast(`✅ Datos extraídos (${datos.modo})`);
+                            }).catch(err => {
+                                console.warn('Error en OCR', err);
+                                actualizarMensaje();
+                            });
+                        } else {
+                            actualizarMensaje();
+                        }
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // --- Eliminar imagen ---
+            function removeImage() {
+                imagenActual = null;
+                previewContainer.classList.add('hidden');
+                previewImg.src = '#';
+                uploadInput.value = '';
+                modoBadge.textContent = 'STELLA';
+                modoBadge.className = 'badge';
+                modoDetectado = 'STELLA';
+                actualizarMensaje();
+                showToast('🖼️ Imagen eliminada');
+            }
+
+            // --- Actualizar mensaje ---
+            function actualizarMensaje() {
+                const usuario = usuarioInput.value.trim() || 'demostellax8556';
+                const clave = claveInput.value.trim() || '1234';
+                const claveAdulto = claveAdultoInput.value.trim();
+                const marca = marcaInput.value.trim() || 'STELLA TV';
+                const duracion = demoSelect.value;
+                const ahora = new Date();
+
+                const dia = String(ahora.getDate()).padStart(2, '0');
+                const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+                const anio = ahora.getFullYear();
+                let horas = ahora.getHours();
+                const ampm = horas >= 12 ? 'p. m.' : 'a. m.';
+                if (horas > 12) horas -= 12;
+                if (horas === 0) horas = 12;
+                const minutos = String(ahora.getMinutes()).padStart(2, '0');
+                const horaStr = `${horas}:${minutos} ${ampm}`;
+
+                let horasSumar = 2;
+                if (duracion.includes('1 HORA')) horasSumar = 1;
+                else if (duracion.includes('6 HORAS')) horasSumar = 6;
+                else horasSumar = 2;
+
+                const vence = new Date(ahora.getTime() + horasSumar * 3600000);
+                let vHoras = vence.getHours();
+                const vAmpm = vHoras >= 12 ? 'p. m.' : 'a. m.';
+                if (vHoras > 12) vHoras -= 12;
+                if (vHoras === 0) vHoras = 12;
+                const vMinutos = String(vence.getMinutes()).padStart(2, '0');
+                const vHoraStr = `${vHoras}:${vMinutos} ${vAmpm}`;
+
+                const duracionTexto = duracion.toLowerCase().includes('hora') ? duracion : `${duracion} horas`;
+                const marcaUpper = marca.toUpperCase();
+
+                let mensaje = '';
+
+                // Si es modo PANAXTREAMING o la marca contiene PANAXTREAMING
+                if (modoDetectado === 'PANAXTREAMING' || marcaUpper.includes('PANAXTREAMING')) {
+                    mensaje = `📺 DATOS DE SU DEMO ${marcaUpper} 📺
+
+👤 Usuario: ${usuario}
+🔑 Clave: ${clave}`;
+                    if (claveAdulto) {
+                        mensaje += `
+🔞 Clave contenido adulto: ${claveAdulto}`;
+                    }
+                    mensaje += `
+
+📅 Fecha de entrega: ${dia}/${mes}/${anio}
+⏰ Hora de entrega: ${horaStr}
+
+⏳ Vence a las: ${vHoraStr} (${duracionTexto} después de creado)
+
+✨ ¡Disfruta de la mejor experiencia con ${marcaUpper}! ✨`;
+                } else {
+                    // Modo STELLA (formato original)
+                    const demoLabel = duracion.includes('1 HORA') ? 'DEMO 1H' :
+                                      duracion.includes('6 HORAS') ? 'DEMO 6H' : 'DEMO 2H';
+                    mensaje = `GENERADOR STELLA - ${demoLabel}
+
+DATOS DE SU DEMO ${marcaUpper}
+
+Usuario: ${usuario}  
+Clave: ${clave}`;
+                    if (claveAdulto) {
+                        mensaje += `  
+Clave adulto: ${claveAdulto}`;
+                    }
+                    mensaje += `  
+
+Fecha de entrega: ${dia}/${mes}/${anio}  
+Hora de entrega: ${horaStr}  
+
+Vence a las: ${vHoraStr} (${duracionTexto} después de creado)  
+
+¡Disfruta de la mejor experiencia con ${marcaUpper}!`;
+                }
+
+                mensajePre.textContent = mensaje;
+            }
+
+            // --- Event listeners ---
+            usuarioInput.addEventListener('input', actualizarMensaje);
+            claveInput.addEventListener('input', actualizarMensaje);
+            claveAdultoInput.addEventListener('input', actualizarMensaje);
+            marcaInput.addEventListener('input', actualizarMensaje);
+            demoSelect.addEventListener('change', actualizarMensaje);
+
+            // Subida por input file
+            uploadInput.addEventListener('change', function(e) {
+                if (this.files && this.files[0]) {
+                    processImage(this.files[0]);
+                }
+            });
+
+            // Drag & drop
+            dropArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropArea.classList.add('dragover');
+            });
+            dropArea.addEventListener('dragleave', () => {
+                dropArea.classList.remove('dragover');
+            });
+            dropArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files && files[0] && files[0].type.startsWith('image/')) {
+                    uploadInput.files = files;
+                    processImage(files[0]);
+                } else {
+                    showToast('⚠️ Solo se permiten imágenes');
+                }
+            });
+
+            // Pegar imagen desde portapapeles
+            document.addEventListener('paste', function(e) {
+                const items = e.clipboardData.items;
+                for (let item of items) {
+                    if (item.type.startsWith('image/')) {
+                        const blob = item.getAsFile();
+                        if (blob) {
+                            const file = new File([blob], 'pegado.png', { type: blob.type });
+                            processImage(file);
+                            showToast('📸 Imagen pegada desde portapapeles');
+                        }
+                        break;
+                    }
+                }
+            });
+
+            // Eliminar imagen
+            removeImgBtn.addEventListener('click', removeImage);
+
+            // Copiar mensaje
+            document.getElementById('copiarBtn').addEventListener('click', function() {
+                const texto = mensajePre.textContent;
+                navigator.clipboard.writeText(texto).then(() => {
+                    showToast('✅ Mensaje copiado al portapapeles');
+                }).catch(() => {
+                    const range = document.createRange();
+                    range.selectNode(mensajePre);
+                    window.getSelection().removeAllRanges();
+                    window.getSelection().addRange(range);
+                    document.execCommand('copy');
+                    window.getSelection().removeAllRanges();
+                    showToast('✅ Mensaje copiado');
+                });
+            });
+
+            // WhatsApp
+            document.getElementById('whatsappBtn').addEventListener('click', function() {
+                const texto = encodeURIComponent(mensajePre.textContent);
+                window.open(`https://wa.me/?text=${texto}`, '_blank');
+            });
+
+            // Inicializar mensaje
+            actualizarMensaje();
+
+            // Cargar Tesseract
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+            script.onload = function() {
+                console.log('Tesseract cargado');
+            };
+            document.head.appendChild(script);
+
+        })();
+    </script>
+</body>
+</html>
